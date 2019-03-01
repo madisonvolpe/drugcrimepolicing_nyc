@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+
+#shapefiles
+*.dbf
+*.prj
+*.shx
+*.sbn
+*.sbx
+*.xml
