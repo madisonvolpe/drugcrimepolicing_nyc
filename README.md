@@ -25,7 +25,13 @@ Data
 
 We are using the following data sources:
 
-*[NYPD Arrest Data YTD](https://data.cityofnewyork.us/Public-Safety/NYPD-Arrest-Data-Year-to-Date-/uip8-fykc) *[NYPD Arrrest Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Arrests-Data-Historic-/8h9b-rp9u) *[NYPD Criminal Court Summons Data YTD](https://data.cityofnewyork.us/Public-Safety/NYPD-Criminal-Court-Summons-Incident-Level-Data-Ye/mv4k-y93f) *[NYPD Criminal Court Summons Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Criminal-Court-Summons-Historic-/sv2w-rv3k)
+\*[NYPD Arrest Data YTD](https://data.cityofnewyork.us/Public-Safety/NYPD-Arrest-Data-Year-to-Date-/uip8-fykc) :white\_check\_mark:
+
+\*[NYPD Arrrest Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Arrests-Data-Historic-/8h9b-rp9u) :white\_check\_mark:
+
+\*[NYPD Criminal Court Summons Data YTD](https://data.cityofnewyork.us/Public-Safety/NYPD-Criminal-Court-Summons-Incident-Level-Data-Ye/mv4k-y93f)
+
+\*[NYPD Criminal Court Summons Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Criminal-Court-Summons-Historic-/sv2w-rv3k)
 
 -   Note each dataset has been filtered to only account for instances that have taken place on Staten Island
 
