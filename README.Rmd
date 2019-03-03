@@ -22,14 +22,14 @@ Due to Staten Island’s current drug problem, as well as the geographic segrega
 
 1. How do drug arrests differ across neighborhoods in Staten Island? 
     
-    +Are certain neighborhoods more targeted for drug arrests ?
-    +Are certain blocks within neighborhoods more targeted for drug arrests?
-    +What is the racial makeup of the targeted neighborhoods and blocks within neighborhoods?
+    + Are certain neighborhoods more targeted for drug arrests ?
+    + Are certain blocks within neighborhoods more targeted for drug arrests?
+    + What is the racial makeup of the targeted neighborhoods and blocks within neighborhoods?
 
 2. Where is drug activity happening on Staten Island?
     
-    +By this we mean, where are drug overdoses happening?
-    +Where are hospital admissions for drug overdoses? Are more admissions happening at the North Shore’s Richmond     University Medical Center (RUMC) or the South Shore’s Staten Island University Hospital (SIUH)?
+    + By this we mean, where are drug overdoses happening?
+    + Where are hospital admissions for drug overdoses? Are more admissions happening at the North Shore’s Richmond     University Medical Center (RUMC) or the South Shore’s Staten Island University Hospital (SIUH)?
 
 3. Are the neighborhoods with the most drug activity targeted more for drug arrests? Can we show that most drug arrests are happening on the Island’s North Shore at a far greater rate than the South Shore even though drug activity is the same rate on both shores? 
 
