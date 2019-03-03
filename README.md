@@ -24,7 +24,7 @@ Due to Staten Island’s current drug problem, as well as the geographic segrega
 Data
 ----
 
-### Datasets
+### Datasets Consulted
 
 We are using the following data sources:
 
@@ -36,7 +36,21 @@ We are using the following data sources:
 
 -   [NYPD Criminal Court Summons Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Criminal-Court-Summons-Historic-/sv2w-rv3k)
 
--   Note each dataset has been filtered to only account for instances that have taken place on Staten Island
+-   [NYC Population by Census Tracts](https://data.cityofnewyork.us/dataset/New-York-City-Population-By-Census-Tracts/kc6e-jm93)
+
+-   [Death/Moratlity Data 2000-2016](https://a816-healthpsi.nyc.gov/epiquery/VS/index.html)
+
+-   [Vital Statistics: Death Micro SAS Datasets](https://www1.nyc.gov/site/doh/data/data-sets/death-micro-sas-datasets.page)
+
+### Datasets Created
+
+-   si\_drugs - all drug arrests from 2013-2018 that have taken place on Staten Island (used - NYPD Arrest Data YTD + NYPD Arrest Data Historic)
+
+-   deaths\_cause - Deaths by each NYC (community district) neighborhood in 2016 (used- DOHMH epiquery)
+
+-   premature\_deaths\_Cause - Premature deaths by each NYC (community district) neighborhood in 2016 (used - DOHMH epiquery)
+
+-   deaths\_psychoactive\_CT - deaths that occured due to psychoactive drugs by Census Tract 2010-2014 (used - DOHMH SAS datasets)
 
 ### Spatial Data
 
