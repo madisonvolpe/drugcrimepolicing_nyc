@@ -1,7 +1,12 @@
 #### Exploratory Analysis of Drug Arrests ####
+library(plyr)
 library(tidyverse)
 library(ggplot2)
-library(ggmap)
+library(sf) # for shapefiles
+library(maptools)
+library(rgdal)
+library(rgeos)
+library(reshape2)
 
 si.drugs <- read.csv("data/si_drugs_arrests.csv")
 si.drugs <- si.drugs[-1]
@@ -72,13 +77,78 @@ si.drugs %>%
   ylab("Arrests") + 
   guides(fill=guide_legend(title="Race"))
   
-# Map showing stops by race 
 
-# Map showing stops by age 
+##### Precinct Mapping #####
 
-# Map showing stops by race + age
+# cleaning 
+
+  # read in precinct shapefile 
+  shp <- readOGR(dsn = "shapefiles/Police_Precincts")
+  shp@data$id = shp@data$precinct
+  
+  # transform shape for ggplot2
+  shp <- gBuffer(shp, byid=TRUE, width=0) #fixes some problem
+  shp.points = fortify(shp, region="id")
+  shp.df = plyr::join(shp.points, shp@data, by="id")
+  
+  # join the drugs data with shp .df by precinct 
+  names(si.drugs)[5] <- "precinct"
+  
+  # filter just do staten island precincts 
+  shp.si <- filter(shp.df, precinct %in% c(120, 121, 122,123))
+  
+# Map showing arrests by race (precinct)
+  
+  ggplot(shp.si) + 
+    aes(long,lat,group=group) + 
+    geom_polygon() +
+    geom_path(color="white") +
+    geom_point(data = si.drugs,aes(x=longitude, y=latitude, col= factor(perp_race)), alpha=0.2, inherit.aes=FALSE) +
+    theme_bw() +
+    ggtitle("Arrests by Race in each Precinct")
+  
+# Map showing arrests by age  (precinct)
+  
+  ggplot(shp.si) + 
+    aes(long,lat,group=group) + 
+    geom_polygon() +
+    geom_path(color="white") +
+    geom_point(data = si.drugs,aes(x=longitude, y=latitude, col= factor(age_group)), alpha=0.2, inherit.aes=FALSE) +
+    theme_bw() +
+    ggtitle("Arrests by Age in each Precinct")
 
 #### Plots w. Classification data by crime (level)
 
 si.drugs.mod <- read.csv("data/si_drugs_mod_arrests.csv")
+
+## Crime Category by Precinct 
+
+si.drugs.mod %>%
+  group_by(arrest_precinct) %>%
+  summarise(MP_Mis = sum(MP_Mis), MP_Fel = sum(MP_Fel), MS_Mis = sum(MS_Mis), MS_Fel = sum(MS_Fel),
+            CSP_Mis = sum(CSP_Mis), CSP_Fel = sum(CSP_Fel), CSS_Fel = sum(CSS_Fel), CSIS_Fel = sum(CSIS_Fel),
+            School = sum(School)) %>%
+  melt(id.vars = "arrest_precinct") %>%
+  ggplot(aes(x=variable, y = value, fill=factor(variable)))+
+    geom_bar(stat="identity") +
+    facet_wrap(vars(arrest_precinct)) + 
+    theme(text = element_text(size = 10),
+        axis.text.x = element_text(angle=90, hjust=1)) + 
+    ggtitle("Crime Type by Precinct") + 
+    xlab("Crime Type")+
+    ylab("Arrests") + 
+    guides(fill=guide_legend(title="Crime Type"))
+
+## Map for Crime Category by Precinct
+
+ggplot(shp.si) + 
+  aes(long,lat,group=group) + 
+  geom_polygon() +
+  geom_path(color="white") +
+  geom_point(data = si.drugs.mod,aes(x=longitude, y=latitude, col= factor()), alpha=0.2, inherit.aes=FALSE) +
+  theme_bw() +
+  ggtitle("Arrests by Age in each Precinct")    
+    
+    
+    
 

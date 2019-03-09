@@ -74,4 +74,4 @@ joined <- joined %>%
          ) %>%
         select(-CSS_Mis, -CSIS_Mis)
   
-write.csv(stat.is,file="si_drugs_mod_arrests.csv")
+write.csv(joined,file="si_drugs_mod_arrests.csv")
