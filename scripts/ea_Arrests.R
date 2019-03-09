@@ -2,7 +2,7 @@
 library(tidyverse)
 library(ggplot2)
 
-si.drugs <- read.csv("data/si_drugs.csv")
+si.drugs <- read.csv("data/si_drugs_arrests.csv")
 si.drugs <- si.drugs[-1]
 
 ##### Arrests by Precinct 
@@ -55,3 +55,8 @@ si.drugs %>%
 
 ## nothing really telling here! I thought maybe we would see more traffic in summer months but this doesnt 
 ## appear to be the case. 
+
+#### Plots w. Frankie's data by crime (level)
+
+si.drugs.mod <- read.csv("data/si_drugs_mod_arrests.csv")
+
