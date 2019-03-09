@@ -1,6 +1,7 @@
 #### Exploratory Analysis of Drug Arrests ####
 library(tidyverse)
 library(ggplot2)
+library(ggmap)
 
 si.drugs <- read.csv("data/si_drugs_arrests.csv")
 si.drugs <- si.drugs[-1]
@@ -56,7 +57,28 @@ si.drugs %>%
 ## nothing really telling here! I thought maybe we would see more traffic in summer months but this doesnt 
 ## appear to be the case. 
 
-#### Plots w. Frankie's data by crime (level)
+# Arrests by Precinct by Race 
+
+si.drugs %>%
+  group_by(arrest_precinct,perp_race) %>%
+  summarise(n=n()) %>%
+  ggplot(aes(x=perp_race, y = n, fill = factor(perp_race)))+
+           geom_bar(stat='identity')+
+           facet_wrap(vars(arrest_precinct))+
+           theme(text = element_text(size = 10),
+                 axis.text.x = element_text(angle=90, hjust=1)) + 
+  ggtitle("Drug Arrests in each Precinct by Race") +
+  xlab("Perpatrator_Race")+
+  ylab("Arrests") + 
+  guides(fill=guide_legend(title="Race"))
+  
+# Map showing stops by race 
+
+# Map showing stops by age 
+
+# Map showing stops by race + age
+
+#### Plots w. Classification data by crime (level)
 
 si.drugs.mod <- read.csv("data/si_drugs_mod_arrests.csv")
 

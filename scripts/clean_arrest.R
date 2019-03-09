@@ -61,5 +61,8 @@ library(lubridate)
   si.drugs$pd_desc <- str_remove_all(pattern="\\s{2,}", string = si.drugs$pd_desc)
   si.drugs$pd_desc <- str_remove_all(pattern="\\.", string = si.drugs$pd_desc)
 
-
+  ## clean up race  
+    #collapse black hispanic and white hispanic to hispanic  
+  si.drugs[grepl("HISPANIC",si.drugs$perp_race), 15] <- "HISPANIC"
+  
   
