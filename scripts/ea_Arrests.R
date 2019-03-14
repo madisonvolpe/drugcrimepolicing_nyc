@@ -19,7 +19,7 @@ si.drugs %>%
   ggplot(aes(x=arrest_precinct, y = n, fill = factor(arrest_precinct))) +
   geom_bar(stat = 'identity') +
   geom_text(aes(label = n), position = position_dodge(width = 0.9))+
-  ggtitle("Number of Drug Arrests by Precinct (20173-YTD)") +
+  ggtitle("Number of Drug Arrests by Precinct (2013-YTD)") +
   xlab("Precinct") +
   ylab("Number Arrests")
 
@@ -141,13 +141,23 @@ si.drugs.mod %>%
 
 ## Map for Crime Category by Precinct
 
-ggplot(shp.si) + 
-  aes(long,lat,group=group) + 
-  geom_polygon() +
-  geom_path(color="white") +
-  geom_point(data = si.drugs.mod,aes(x=longitude, y=latitude, col= factor()), alpha=0.2, inherit.aes=FALSE) +
-  theme_bw() +
-  ggtitle("Arrests by Age in each Precinct")    
+   map_dat <- si.drugs.mod %>%
+    select(longitude, latitude, MP_Mis, MP_Fel, MS_Mis, MS_Fel, CSP_Mis, CSP_Fel, CSS_Fel, CSIS_Fel, School) %>%
+    melt(id.vars = c("longitude", "latitude")) %>%
+    filter(value ==1)
+   
+   
+   ggplot(shp.si) + 
+     aes(long,lat,group=group) + 
+     geom_polygon() +
+     geom_path(color="white") +
+     geom_point(data = map_dat,aes(x=longitude, y=latitude, col= factor(variable)), alpha=0.4, inherit.aes=FALSE) +
+     scale_color_brewer(palette = "Spectral")+
+     ggtitle("Crime Type by Precinct")
+   
+    
+
+
     
     
     
