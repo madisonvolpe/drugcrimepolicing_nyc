@@ -91,9 +91,6 @@ si.drugs %>%
   shp.points = fortify(shp, region="id")
   shp.df = plyr::join(shp.points, shp@data, by="id")
   
-  # join the drugs data with shp .df by precinct 
-  names(si.drugs)[5] <- "precinct"
-  
   # filter just do staten island precincts 
   shp.si <- filter(shp.df, precinct %in% c(120, 121, 122,123))
   
@@ -146,7 +143,6 @@ si.drugs.mod %>%
     melt(id.vars = c("longitude", "latitude")) %>%
     filter(value ==1)
    
-   
    ggplot(shp.si) + 
      aes(long,lat,group=group) + 
      geom_polygon() +
@@ -155,7 +151,104 @@ si.drugs.mod %>%
      scale_color_brewer(palette = "Spectral")+
      ggtitle("Crime Type by Precinct")
    
-    
+
+##### Census Tract Analysis #####
+   
+   # upload staten island demographics (census tract) dataset 
+   si.democt <-  read.csv("data/CensusTract_Demo.csv")
+   si.democt <- si.democt[1:11]
+   si.democt <- filter(si.democt, grepl("Richmond County",GEO_LABEL))
+   names(si.democt)[2] <- "geoid"
+   
+   # read in Census Tracy shapefile 
+   shp <- readOGR(dsn = "shapefiles/CensusTract")
+  
+   #convert to epsg:4326
+   shp <- st_as_sf(shp)
+   shp <- st_transform(shp, 4326)
+   
+   #convert back to SpatialPolygonsDf
+   shp <- as(shp, 'Spatial')
+   
+   shp@data$id = shp@data$geoid
+
+   # transform shape for ggplot2
+   #shp <- gBuffer(shp, byid=TRUE, width=0) #fixes some problem
+   shp.points = fortify(shp, region="id")
+   shp.df = plyr::join(shp.points, shp@data, by="id")
+   
+   shp.df$geoid <- as.character(shp.df$geoid)
+   
+   # filter just get staten island census tracts
+   shp.si <- shp.df[str_sub(shp.df$geoid, 4,5) == "85",]
+   
+# Map showing arrests by race Census Tract
+   
+   ggplot(shp.si) + 
+     aes(long,lat,group=group) + 
+     geom_polygon() + 
+     geom_path(color="white") + 
+     geom_point(data = si.drugs,aes(x=longitude, y=latitude, col= factor(perp_race)), alpha=0.2, inherit.aes=FALSE) +
+     theme_bw() +
+     ggtitle("Arrests by Race in each Census Tract")
+   
+   
+# Map showing arrests by race Census Tract (with race of Census Tract in map) 
+   
+   #join demo to shp dataframe
+   shp.si.demo<-join(shp.si, si.democt, by = "geoid")
+   shp.si.demo$Black <- as.numeric(as.character(shp.si.demo$Black))
+   shp.si.demo$White <- as.numeric(as.character(shp.si.demo$White))
+   
+   ggplot(shp.si.demo) + 
+     aes(long,lat,group=group) + 
+     geom_polygon(aes(fill=Black)) + 
+     scale_fill_continuous(type = "viridis")+
+     geom_path(color="white") + 
+     geom_point(data = si.drugs,aes(x=longitude, y=latitude, col= factor(perp_race)), alpha=0.2, inherit.aes=FALSE) +
+     theme_bw() +
+     ggtitle("Arrests by Race in each Census Tract (Black Population)")
+   
+   ggplot(shp.si.demo) + 
+     aes(long,lat,group=group) + 
+     geom_polygon(aes(fill=White)) + 
+     scale_fill_continuous(type = "viridis")+
+     geom_path(color="white") + 
+     geom_point(data = si.drugs,aes(x=longitude, y=latitude, col= factor(perp_race)), alpha=0.2, inherit.aes=FALSE) +
+     theme_bw() +
+     ggtitle("Arrests by Race in each Census Tract (White Population)")
+   
+   
+   
+   
+
+   
+   
+   
+   
+   
+
+   
+# Count how many drug arrests in each Census Tract 
+   shp_sf<- st_as_sf(shp)
+   
+   points <- data.frame(long = si.drugs$longitude, lat = si.drugs$latitude)
+   points <- st_as_sf(points, coords = c("long", "lat"), 
+                      crs = 4326, agr = "constant")
+   
+   pointswithin <- st_within(x = points,y = shp_sf, prepared = T)
+   pw <- as.data.frame(pointswithin)
+  
+  
+     
+     
+                                            
+                                
+                                        
+                                
+                                            
+                                            
+                                           
 
 
     
