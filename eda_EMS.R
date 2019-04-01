@@ -88,9 +88,23 @@ ems %>%
 #10301 - should consider that the 10301 zipcode contains the St. George Terminal 
 
 
-## Zipcode 
+## Zipcode analysis with demographics 
 
+demo <- read.csv("data/DemoByZipACS2017.csv")
+names(demo)[2] <- "zipcode"
 
+ems_demo <- left_join(ems, demo, by = 'zipcode')
+
+zipWhite<-ems_demo %>%
+  select(zipcode, Estimate..Total., Estimate..Total....White.alone) %>%
+  mutate(percentWhite = (Estimate..Total....White.alone/Estimate..Total.)*100) %>%
+  distinct(zipcode, percentWhite)
+
+ems %>%
+  group_by(zipcode) %>%
+  summarise(n=n()) %>%
+  arrange(desc(n)) %>% 
+  left_join(zipWhite)
 
 
 
