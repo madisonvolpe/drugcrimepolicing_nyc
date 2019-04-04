@@ -1,0 +1,74 @@
+---
+title: "Poisson Models Outline"
+author: "Madison Volpe"
+date: "4/4/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Model One: Poisson Regression (Comparing Across (g) = Zipcodes)
+
+$$
+s_{g} = Poisson(p_{g} * e^{\mu + \alpha log (c_{g}) + \beta r_{g}}) 
+$$
+
+* g is zipcode 
+
+* s_{g} is the number of 'drug arrests' in zipcode (g)
+
+* p_{g} is the total population in zipcode (g) 
+
+* c_{g} is # of EMS Dispatches concerning drugs made in zipcode (g) - this is our measure of 'drug activity' for this model
+
+* r_{g} is the racial composition of zipcode (g) in this case it would be (proportion non-white)
+
+* Some notes about this model is that we must be less granular and use zip if our measure of drug activity is ems calls bc that is the only measure that EMS data goes down too (it is pretty deidentified). 
+
+## Model Two: Poisson Regression (Comparing Within (g) = Zipcodes)
+
+$$
+s_{r,g} \sim Poisson(p_{r,g} * e^{\alpha_{r} + \beta_{g}}) 
+$$ 
+
+* s_{r,g} is the number of drug arrests for race r in zipcode g
+
+* p_{r,g} is the population of race r in zipcode g 
+
+* There are coefficients for each race group $\alpha_{r}$
+
+* There are coefficients for each zipcode $\beta_{g}$
+
+## Model 3: Poisson Regression (Comparing Across (g) = NTA)
+
+$$
+s_{g} = Poisson(p_{g} * e^{\mu + \alpha log (c_{g}) + \beta r_{g}}) 
+$$
+
+* g is Neighborhood Tabulation Area  
+
+* s_{g} is the number of 'drug arrests' in NTA (g)
+
+* p_{g} is the total population in NTA (g) 
+
+* c_{g} is # of 311 calls made about drugs in NTA (g) - this is our measure of 'drug activity' for this model
+
+* r_{g} is the racial composition of NTA (g) in this case it would be (proportion non-white)
+
+* Some notes about this model is that we can be more granular bc 311 has lat, lon points, therefore we are able to count the number of complaints made in each NTA using some methods from the sp package in R. 
+
+## Model 4: Poisson Regression (Comparing Within (g) = NTA)
+
+$$
+s_{r,g} \sim Poisson(p_{r,g} * e^{\alpha_{r} + \beta_{g}}) 
+$$ 
+
+* s_{r,g} is the number of drug arrests for race r in NTA g
+
+* p_{r,g} is the population of race r in NTA g 
+
+* There are coefficients for each race group $\alpha_{r}$
+
+* There are coefficients for each zipcode $\beta_{g}$

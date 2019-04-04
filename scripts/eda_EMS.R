@@ -97,20 +97,16 @@ ems_demo <- left_join(ems, demo, by = 'zipcode')
 
 zipWhite<-ems_demo %>%
   select(zipcode, Estimate..Total., Estimate..Total....White.alone) %>%
-  mutate(percentWhite = (Estimate..Total....White.alone/Estimate..Total.)*100) %>%
-  distinct(zipcode, percentWhite)
+  mutate(percentWhite = (Estimate..Total....White.alone/Estimate..Total.)*100,
+         percentnonWhite = ((Estimate..Total.-Estimate..Total....White.alone)/
+                              Estimate..Total.)*100) %>%
+  distinct(zipcode, percentWhite, percentnonWhite)
 
 ems %>%
   group_by(zipcode) %>%
   summarise(n=n()) %>%
   arrange(desc(n)) %>% 
   left_join(zipWhite)
-
-
-
-
-
-
 
 ## Food for thought 
 
