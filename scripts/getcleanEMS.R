@@ -138,10 +138,21 @@ str(ems)
      mutate(final_call_type = as.character(final_call_type)) %>%
      mutate(indic = case_when(
        initial_call_type == final_call_type ~ "No Drop",
-       !initial_call_type %in% c("DRUG", "DRUGFC") & final_call_type %in% c("DRUG", "DRUGFC") ~ "No Drop",
-       initial_call_type  %in% c("DRUG", "DRUGFC") & !final_call_type %in% c("DRUG", "DRUGFC") ~ "Drop"
+       !initial_call_type %in% c("DRUG", "DRUGFC", "EDP", "UNC") & 
+         final_call_type %in% c("DRUG", "DRUGFC", "EDP", "UNC") ~ "No Drop",
+       initial_call_type  %in% c("DRUG", "DRUGFC", "EDP", "UNC") & !final_call_type %in% c("DRUG", "DRUGFC", "EDP", "UNC") ~ "Drop"
      ))
 
+# EDP - PSYCHIATRIC PATIENT
+# UNC - UNCONSCIOUS PATIENT
+   
+# because we are keeping these sometimes (we should be clear this could be slightly higher)! 
+  
+# basically we are dropping the final call types that are not DRUG, DRUGFC, EDP, OR UNC 
+
+ems.drugs.final <- filter(ems.drugs, indic == 'No Drop')
+   
+  
 # write to csv 
 
-write_csv(ems.drugs, "emsdrugs.csv")
+write_csv(ems.drugs.final, "emsdrugs.csv")
