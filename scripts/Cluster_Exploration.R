@@ -16,7 +16,7 @@ library(dplyr)
 library(fpc)
 ####Checking K values to see if the points are Randomized#######
 
-SI<-read.csv("/Users/frankie/Desktop/drugcrimepolicing_nyc/data/si_drugs_mod_arrests.csv")
+SI<-read.csv("/Users/frankie/Desktop/GitHub/drugcrimepolicing_nyc/data/si_drugs_mod_arrests.csv")
 Smn <- apply(SI[,c("longitude","latitude")],2,min)
 Smx <- apply(SI[,c("longitude","latitude")],2,max)
 SP <- ppp(SI$longitude,SI$latitude,window=owin(c(Smn[1],Smx[1]),c(Smn[2],Smx[2])))
@@ -34,8 +34,8 @@ plot(BE.square, main="K values for Black Perpitrators")
 
 ####Now checking Clusters/Spatial with Race and population Make up built in
 
-NTA1<-read.csv("/Users/frankie/Desktop/SI_project/NTA_COUNT_POP.csv")
-NTA<-read.csv("/Users/frankie/Desktop/SI_project/NTA_COUNT_POP.csv")
+NTA1<-read.csv("/Users/frankie/Desktop/GitHub/drugcrimepolicing_nyc/data/NTA_COUNT_POP.csv")
+NTA<-read.csv("/Users/frankie/Desktop/GitHub/drugcrimepolicing_nyc/data/NTA_COUNT_POP.csv")
 #Look over NTA Data
 View(NTA)
 #Population variables are factor because of commas
@@ -90,7 +90,7 @@ n.strata <- prod(dim(xtabs(~Race,data=race.agg)))
 SI.agg$adj.rate <- 1000*expected(race.agg$Population, race.agg$Arrests, n.strata)
 
 
-SI.shp<-readOGR("/Users/frankie/Desktop/SI_project/SI_WG/New_Stat.shp")
+SI.shp<-readOGR("/Users/frankie/Desktop/SI_WG/New_Stat.shp")
 #read in shape file of staten island
 
 SI.latlong <- SI.shp
@@ -124,7 +124,7 @@ moran.plot(SI.agg$adj.rate, SI.lw)
 #other is old town dongan hills south beach area
 
 ###DBscan Statistic
-SI<-read.csv("/Users/frankie/Desktop/drugcrimepolicing_nyc/data/si_drugs_mod_arrests.csv")
+SI<-read.csv("/Users/frankie/Desktop/GitHub/drugcrimepolicing_nyc/data/si_drugs_mod_arrests.csv")
 eucdist<-dist(SI[,c("longitude","latitude")],method = "euclidean")
 euc.mat<-as.matrix(eucdist)
 
@@ -137,6 +137,9 @@ scan1<-dbscan(SI[,c("longitude","latitude")],eps=.01,MinPts = 4)
 max(scan1$cluster) #only 1 cluster created
 scan2<-dbscan(SI[,c("longitude","latitude")],eps=.005,MinPts = 4)
 max(scan2$cluster) #7 clusters created could make good sense
+ggplot(data=SI, aes(x="Longitude",y="Latitude"))+geom_point(col=scan2$cluster)
+
+
 scan3<-dbscan(SI[,c("longitude","latitude")],eps=.008,MinPts = 10)
 max(scan3$cluster) #no good only 1 cluster
 scan4<-dbscan(SI[,c("longitude","latitude")],eps=.008,MinPts = 4)
