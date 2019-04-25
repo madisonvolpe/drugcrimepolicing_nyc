@@ -1,0 +1,209 @@
+---
+title: "Running Models"
+author: "Erik Wang, Frankie Wunschel, Madison Volpe"
+date: "4/22/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Model One: Poisson Regression (Comparing Across (g) = Zipcodes)
+
+$$
+s_{g} = Poisson(p_{g} * e^{\mu + \alpha c_{g} + \beta r_{g}}) 
+$$
+
+
+* g is zipcode 
+
+* s_{g} is the number of 'drug arrests' in zipcode (g)
+
+* p_{g} is the total population in zipcode (g) 
+
+* c_{g} is # of EMS Dispatches concerning drugs made in zipcode (g) - this is our measure of 'drug activity' for this model
+
+* r_{g} is the racial composition of zipcode (g) in this case it would be (proportion non-white)
+
+* Some notes about this model is that we must be less granular and use zip if our measure of drug activity is ems calls bc that is the only measure that EMS data goes down too (it is pretty deidentified). 
+
+### Load Data 
+
+```{r}
+mod1dat <- read.csv("data/ModelDatasets/zipcodeModel1.csv")
+```
+
+### Fit Poisson Model
+
+```{r}
+mod1dat$zip <- factor(mod1dat$zip)
+```
+
+```{r}
+mod1 <- glm(formula = no.drug.arrests.13.18 ~ no.ems.calls.13.18 + proportionNonWhite, 
+            offset = log(Total.Population.Over18),family = poisson ,data = mod1dat)
+
+arm::display(mod1)
+```
+
+```{r}
+summary(mod1)
+```
+
+* *Intercept* - no interpretation
+* *Measure of drug activity* - coefficient is practically 0
+* *Proportion non white* - The greater the proportion of nonwhite people in a zip, the greater the number of drug arrests. A one unit increase in the proportion of nonwhite people, the number of drug arrests will increase with a multiplicative effect of 7.92. 
+
+### Test for overdispersion
+
+```{r}
+yhat <- predict(mod1, type = 'response')
+z <- (mod1dat$no.drug.arrests.13.18 - yhat) / sqrt(yhat)
+cat('overdispersion ratio is', sum(z^2)/(12-3), "\n")
+cat('p-value of overdispersion test is', pchisq(sum(z^2), 12-3), "\n")
+```
+
+```{r}
+y.hat <- predict(mod1, type = 'response')
+u <- resid(mod1)
+sigma <- arm::sigma.hat(mod1)
+```
+
+```{r}
+arm::residual.plot(y.hat,u, sigma)
+```
+
+* ALOT of overdispersion (122) and it is significant.  
+
+### Attempt to Fix Overdispersion with Quasipoisson 
+
+```{r}
+mod1quasi <- glm(formula = no.drug.arrests.13.18 ~ no.ems.calls.13.18 + proportionNonWhite, 
+                 offset  = log(Total.Population.Over18),family = quasipoisson ,data = mod1dat)
+```
+
+```{r}
+summary(mod1quasi)
+```
+
+## Model Two: Poisson Regression (Comparing Across Zipcodes (g) + Time (t))
+
+$$
+s_{g,t} = Poisson(p_{g,t} * e^{\mu + \alpha c_{g,t} + \beta r_{g,t}}) 
+$$
+
+```{r}
+mod2dat <- read.csv("data/ModelDatasets/zipcodeModel2.csv")
+```
+
+* g is zipcode 
+
+* s_{g} is the number of 'drug arrests' in zipcode (g)
+
+* p_{g,t} is the total population in zipcode (g) at time (t) 
+
+* c_{g,t} is # of EMS Dispatches concerning drugs made in zipcode (g)  at time (t)- this is our measure of 'drug activity' for this model
+
+* r_{g,t} is the racial composition of zipcode (g) at time (t) in this case it would be (proportion non-white)
+
+```{r}
+mod2dat$zip <- factor(mod2dat$zip)
+```
+
+### Fit Poisson Model
+
+```{r}
+mod2 <- glm(formula = no.drug.arrests.14.17 ~ no.ems.calls.14.17 + proportionNonWhite, offset = log(Total.Population),
+            family = poisson, data = mod2dat)
+
+arm::display(mod2)
+```
+
+```{r}
+summary(mod2)
+```
+
+* *Intercept* - not interpretable 
+
+* *no.ems.calls.14.17* - again basically 0 
+
+* *proportionNonWhite* - so this is similar to the coefficient estimate from before, the greater the proportion of nonwhite people, the greater the number of drug arrests. A one unit increase in the proportion of nonwhite people, the number of drug arrests will increase with a multiplicative effect of 11.58.
+
+### Test for overdispersion 
+
+```{r}
+yhat <- predict(mod2, type = 'response')
+z <- (mod2dat$no.drug.arrests.14.17 - yhat) / sqrt(yhat)
+cat('overdispersion ratio is', sum(z^2)/(48-3), "\n") #n -k 
+cat('p-value of overdispersion test is', pchisq(sum(z^2), 48-3), "\n")
+```
+
+* Again overdispersion is a problem it is 48.12, and the p-value attached is 1, but adding the extra observations did seem to decrease it, which is a good thing I guess. 
+
+```{r}
+y.hat <- predict(mod2, type = 'response')
+u <- resid(mod2)
+sigma <- arm::sigma.hat(mod2)
+```
+
+```{r}
+arm::residual.plot(y.hat,u, sigma)
+```
+
+### Quasipoisson 
+
+```{r}
+mod2quasi <- glm(formula = no.drug.arrests.14.17 ~ no.ems.calls.14.17 + proportionNonWhite, offset = log(Total.Population),family = quasipoisson, data = mod2dat)
+
+arm::display(mod2quasi) 
+```
+
+* The coefficient standard errors are definitely bigger than the model fit w. the poisson link, but they are not 'very big' in that I am definitely not worried about them. 
+* With this model, the proportionNonWhite parameter stays significant, but the no.ems.calls variable does not
+
+## Model Three: Same as Model One with Extra Drug Activity Measures 
+
+$$
+s_{g} = Poisson(p_{g} * e^{\mu + \alpha c_{g} + \beta r_{g} + \beta d_{g} + \beta z_{g}}) 
+$$
+
+* g is zipcode 
+
+* s_{g} is the number of 'drug arrests' in zipcode (g)
+
+* p_{g} is the total population in zipcode (g) - population over age 18 
+
+* c_{g} is # of EMS Dispatches concerning drugs made in zipcode (g) - this is our measure of 'drug activity' for this model
+
+* r_{g} is the racial composition of zipcode (g) in this case it would be (proportion non-white)
+
+* d_{g} is the total Number of Overdose deaths that occured from 2016-2018 in zipcode g 
+ 
+* m_{g} is the total Number of Naxolone saves that occured from 2016-2018 in zipcode g
+
+```{r}
+mod3dat <- read.csv("data/ModelDatasets/zipcodeModel3.csv")
+```
+
+```{r}
+mod3 <- glm(formula = no.drug.arrests.13.18 ~ no.ems.calls.13.18 + proportionNonWhite + Total.Naxolone.Saves +
+            Overdose.Death.Total, offset = log(Total.Population.Over18),family = poisson, data = mod3dat)
+
+arm::display(mod3) 
+```
+
+```{r}
+summary(mod3)
+```
+
+### Test for overdispersion 
+
+```{r}
+yhat <- predict(mod3, type = 'response')
+z <- (mod3dat$no.drug.arrests.13.18 - yhat) / sqrt(yhat)
+cat('overdispersion ratio is', sum(z^2)/(12-5), "\n") #n -k 
+cat('p-value of overdispersion test is', pchisq(sum(z^2), 12-5), "\n")
+```
+
+* There is a bit of overdispersion in this model (94.67) and it is statistically significant. 

@@ -14,6 +14,8 @@ library(rgdal)
 library(rgeos)
 library(reshape2)
 
+### DATASET ONE ###
+
 # First we will get the count of the number of drug arrests that occured in each zipcode 
   
   # read in drug arrests 
@@ -79,24 +81,111 @@ zip_model_dataset <- left_join(final_arrest_counts_by_zip, final_ems_counts_by_z
 
 # add demographics 
 
-demo <- read.csv("data/DemoByZipACS2017.csv")
+demo <- read.csv("data/ACS_Demo/ACS.14_17.csv")
 
-demo <- filter(demo, Id2 %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
-                        10312, 10301, 10304, 10305, 10314, 10311, 10313))
+demo <- filter(demo, zip %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                        10312, 10301, 10304, 10305, 10314, 10313))
+
+demo <- filter(demo, year == 2017 ) # for lump sum estimates use (ACS 2017 5 year estimates)
 
 demofinal <- demo %>%
-            select(Id2, Estimate..Total., Estimate..Total....White.alone) %>%
-            mutate(proportionWhite = (Estimate..Total....White.alone/Estimate..Total.),
-                   proportionNonWhite = ((Estimate..Total.-Estimate..Total....White.alone)/
-                                            Estimate..Total.))%>%
-            select(Id2, Estimate..Total.,proportionWhite, proportionNonWhite) %>%
-            filter(Id2 != 10311)
-
-names(demofinal)[1] <- 'zip'
+            select(zip, Total.Population, Total.Population.Over18, White.Alone) %>%
+            mutate(proportionWhite = (White.Alone/Total.Population),
+                   proportionNonWhite = ((Total.Population-White.Alone)/
+                                           Total.Population))%>%
+            select(zip, Total.Population, Total.Population.Over18, proportionWhite, proportionNonWhite) 
 
 # join demographics with data 
 zip_model_dataset <- left_join(zip_model_dataset, demofinal, by = 'zip')
+write_csv(zip_model_dataset, "data/ModelDatasets/zipcodeModel1.csv")
 
-write_csv(zip_model_dataset, "zipcodeModel1.csv")
+# add in extra drug activity dataset 
+zip.extra.drug <- read.csv("data/ZipCodeDrugStats.csv")
+names(zip.extra.drug)[1] <- 'zip'
+zip.extra.drug <- select(zip.extra.drug, zip, Total.Naxolone.Saves, Overdose.Death.Total)
+zip_model_dataset2 <- left_join(zip_model_dataset, zip.extra.drug, by = 'zip')
 
+# write to csv - this corresponds to our 3rd model
+write_csv(zip_model_dataset2, "data/ModelDatasets/zipcodeModel3.csv")
 
+rm(list=ls())
+
+### DATASET 2 ###
+
+  # read in drug arrests 
+  drugs <- read.csv("data/si_drugs_mod_arrests.csv")
+
+  # read in zip shapefile 
+  zip   <-readOGR(dsn = "shapefiles/ZipCode")
+
+  # convert zip to sf 
+  zip <- st_as_sf(zip)
+  zip <- zip[,c(1,4)]
+
+  # filter for SI zip codes only 
+  zip <- filter(zip, zcta %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                               10312, 10301, 10304, 10305, 10314, 10311, 10313))
+
+  colnames(zip) <- c("zip", "geometry")
+
+  # transfom zip to 4326 
+  zip <- st_transform(zip, 4326)
+
+  # get points from drugs dataset 
+  points <- data.frame(x = drugs$longitude,  y = drugs$latitude, id = 1:nrow(drugs), year = drugs$year) 
+  points <- st_as_sf(points, coords = c("x", "y"), crs = 4326)
+
+  # Intersection between polygon and points -
+  intersection <- st_intersection(x = zip, y = points)
+
+  # Counts 
+  intresult <- intersection %>% 
+    group_by(zip, year) %>% 
+    count() %>%
+    select(zip,year,n)
+  
+  intresult <- intresult %>%
+    filter(year, year %in% c(2014, 2015, 2016, 2017))
+
+final_arrest_counts_by_zip_year <- as.data.frame(intresult)[,-4] # lost some observations (4) but that is okay 
+final_arrest_counts_by_zip_year$zip <- as.numeric(as.character(final_arrest_counts_by_zip_year$zip))
+names(final_arrest_counts_by_zip_year)[3] <- 'no.drug.arrests.14.17'
+
+ems <- read.csv("data/emsdrugs.csv")
+
+final_ems_counts_by_zip_year <- ems %>%
+  group_by(zipcode,year) %>%
+  count() %>%
+  select(zipcode,year,n)
+
+final_ems_counts_by_zip_year <- filter(final_ems_counts_by_zip_year, 
+                                          year %in% c(2014,2015,2016,2017))
+
+names(final_ems_counts_by_zip_year)[1] <- 'zip'
+names(final_ems_counts_by_zip_year)[3] <- 'no.ems.calls.14.17'
+
+# join arrests and ems counts
+zip_model_dataset_year <- left_join(final_arrest_counts_by_zip_year, final_ems_counts_by_zip_year, by = c('zip','year'))
+
+# add demographics 
+
+demo <- read.csv("data/DemoByZipACS2017.csv")
+
+demo <- filter(demo, Id2 %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                                10312, 10301, 10304, 10305, 10314, 10311, 10313))
+
+demofinal <- demo %>%
+  select(Id2, Estimate..Total., Estimate..Total....White.alone) %>%
+  mutate(proportionWhite = (Estimate..Total....White.alone/Estimate..Total.),
+         proportionNonWhite = ((Estimate..Total.-Estimate..Total....White.alone)/
+                                 Estimate..Total.))%>%
+  select(Id2, Estimate..Total.,proportionWhite, proportionNonWhite) %>%
+  filter(Id2 != 10311)
+
+names(demofinal)[1] <- 'zip'
+names(demofinal)[2] <- 'Total.Population'
+
+# join demographics with data 
+zip_model_dataset_year <- left_join(zip_model_dataset_year, demofinal, by = 'zip')
+
+write_csv(zip_model_dataset_year, "data/ModelDatasets/zipcodeModel2.csv")
