@@ -97,7 +97,9 @@ demofinal <- demo %>%
 
 # join demographics with data 
 zip_model_dataset <- left_join(zip_model_dataset, demofinal, by = 'zip')
-write_csv(zip_model_dataset, "data/ModelDatasets/zipcodeModel1.csv")
+#write_csv(zip_model_dataset, "data/ModelDatasets/zipcodeModel1.csv")
+
+#### DATASET THREE ####
 
 # add in extra drug activity dataset 
 zip.extra.drug <- read.csv("data/ZipCodeDrugStats.csv")
@@ -106,7 +108,7 @@ zip.extra.drug <- select(zip.extra.drug, zip, Total.Naxolone.Saves, Overdose.Dea
 zip_model_dataset2 <- left_join(zip_model_dataset, zip.extra.drug, by = 'zip')
 
 # write to csv - this corresponds to our 3rd model
-write_csv(zip_model_dataset2, "data/ModelDatasets/zipcodeModel3.csv")
+#write_csv(zip_model_dataset2, "data/ModelDatasets/zipcodeModel3.csv")
 
 rm(list=ls())
 
@@ -169,23 +171,20 @@ zip_model_dataset_year <- left_join(final_arrest_counts_by_zip_year, final_ems_c
 
 # add demographics 
 
-demo <- read.csv("data/DemoByZipACS2017.csv")
+demo <- read.csv("data/ACS_Demo/ACS.14_17.csv")
 
-demo <- filter(demo, Id2 %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+demo <- filter(demo, zip %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
                                 10312, 10301, 10304, 10305, 10314, 10311, 10313))
 
 demofinal <- demo %>%
-  select(Id2, Estimate..Total., Estimate..Total....White.alone) %>%
-  mutate(proportionWhite = (Estimate..Total....White.alone/Estimate..Total.),
-         proportionNonWhite = ((Estimate..Total.-Estimate..Total....White.alone)/
-                                 Estimate..Total.))%>%
-  select(Id2, Estimate..Total.,proportionWhite, proportionNonWhite) %>%
-  filter(Id2 != 10311)
+            select(zip, Total.Population, Total.Population.Over18, White.Alone,year) %>%
+            mutate(proportionWhite = (White.Alone/Total.Population),
+                   proportionNonWhite = ((Total.Population-White.Alone)/
+                                 Total.Population))%>%
+            select(zip, Total.Population, Total.Population.Over18, proportionWhite, proportionNonWhite,year) 
 
-names(demofinal)[1] <- 'zip'
-names(demofinal)[2] <- 'Total.Population'
 
 # join demographics with data 
-zip_model_dataset_year <- left_join(zip_model_dataset_year, demofinal, by = 'zip')
+zip_model_dataset_year <- left_join(zip_model_dataset_year, demofinal, by = c('zip','year'))
 
 write_csv(zip_model_dataset_year, "data/ModelDatasets/zipcodeModel2.csv")
