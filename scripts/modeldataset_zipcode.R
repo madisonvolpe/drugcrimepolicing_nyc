@@ -188,3 +188,80 @@ demofinal <- demo %>%
 zip_model_dataset_year <- left_join(zip_model_dataset_year, demofinal, by = c('zip','year'))
 
 write_csv(zip_model_dataset_year, "data/ModelDatasets/zipcodeModel2.csv")
+
+#### Dataset Four #### - Some multilevel model 
+
+# read in drug arrests 
+drugs <- read.csv("data/si_drugs_mod_arrests.csv")
+
+# read in zip shapefile 
+zip <- readOGR(dsn = "shapefiles/ZipCode")
+
+# convert zip to sf 
+zip <- st_as_sf(zip)
+zip <- zip[,c(1,4)]
+
+# filter for SI zip codes only 
+zip <- filter(zip, zcta %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                               10312, 10301, 10304, 10305, 10314, 10311, 10313))
+
+colnames(zip) <- c("zip", "geometry")
+
+# transfom zip to 4326 
+zip <- st_transform(zip, 4326)
+
+# get points from drugs dataset 
+points <- data.frame(x = drugs$longitude,  y = drugs$latitude, id = 1:nrow(drugs), year = drugs$year,
+                     race = drugs$perp_race)
+
+points <- st_as_sf(points, coords = c("x", "y"), crs = 4326)
+
+# Intersection between polygon and points -
+intersection <- st_intersection(x = zip, y = points)
+
+intresult <- intersection %>% 
+  group_by(zip, race) %>% 
+  count() %>%
+  select(zip,race,n)
+
+intresult <- as.data.frame(intresult[,-4])
+intresult$race <- as.character(intresult$race)
+  
+intresult <- intresult %>%
+  filter(race %in% c('BLACK', 'HISPANIC', 'WHITE'))
+
+names(intresult)[3] <- 'no.drug.arrests.13.18'
+
+# ems calls
+ems <- read.csv("data/emsdrugs.csv")
+
+final_ems_counts_by_zip <- ems %>%
+  group_by(zipcode) %>%
+  count() %>%
+  select(zipcode,n)
+
+names(final_ems_counts_by_zip)[1] <- 'zip'
+names(final_ems_counts_by_zip)[2] <- 'no.ems.calls.13.18'
+intresult$zip <- as.numeric(as.character(intresult$zip))
+
+# join arrests and ems counts
+zip_model_multilevel_race <- left_join(intresult, final_ems_counts_by_zip, by = 'zip')
+
+#demo data
+demo <- read.csv("data/ACS_Demo/ACS.14_17.csv")
+
+demo <- filter(demo, zip %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                                10312, 10301, 10304, 10305, 10314, 10313))
+
+demo <- filter(demo, year == 2017 ) # for lump sum estimates use (ACS 2017 5 year estimates)
+
+demofinal <- demo %>%
+  select(zip, Total.Population, Total.Population.Over18, White.Alone) %>%
+  mutate(proportionWhite = (White.Alone/Total.Population),
+         proportionNonWhite = ((Total.Population-White.Alone)/
+                                 Total.Population))%>%
+  select(zip, Total.Population, Total.Population.Over18, proportionWhite, proportionNonWhite) 
+
+# join demographics with data 
+zip_model_multilevel_race <- left_join(zip_model_multilevel_race, demofinal, by = 'zip')
+

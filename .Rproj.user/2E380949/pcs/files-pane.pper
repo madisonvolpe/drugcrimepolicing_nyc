@@ -1,6 +1,10 @@
 {
-    "path" : "~/Documents/Grad_School/Spring_2019/DACJS/CJA/data/ModelDatasets",
+    "path" : "~/Documents/Grad_School/Spring_2019/DACJS/CJA/models",
     "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
         {
             "ascending" : true,
             "columnIndex" : 2

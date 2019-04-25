@@ -69,13 +69,14 @@ cat('p-value of overdispersion test is', pchisq(sum(z^2), 12-3), "\n")
 ```
 
 ```{r}
-y.hat <- predict(mod1, type = 'response')
-u <- resid(mod1)
-sigma <- arm::sigma.hat(mod1)
-```
-
-```{r}
-arm::residual.plot(y.hat,u, sigma)
+par(mfrow=c(1,2))
+pv <- fitted(mod1) #predicted values 
+r <- (mod1dat$no.drug.arrests.13.18 - fitted(mod1)) #residuals
+plot(pv, r, pch=20, ylab="raw residuals", xlab="predicted value")
+abline(h=0)
+sr <- rstandard(mod1)#standardized residual 
+plot(pv, sr, pch=20, ylab="standardized residuals", xlab="predicted value")
+abline(h=c(-2,0,2),lty=c(2,1,2))
 ```
 
 * ALOT of overdispersion (122) and it is significant.  
@@ -146,13 +147,14 @@ cat('p-value of overdispersion test is', pchisq(sum(z^2), 48-3), "\n")
 * Again, overdispersion is a problem it is 37.66, and the p-value attached is 1, but adding the extra observations did seem to decrease it, which is a good thing I guess. 
 
 ```{r}
-y.hat <- predict(mod2, type = 'response')
-u <- resid(mod2)
-sigma <- arm::sigma.hat(mod2)
-```
-
-```{r}
-arm::residual.plot(y.hat,u, sigma)
+par(mfrow=c(1,2))
+pv <- fitted(mod2) #predicted values 
+r <- (mod2dat$no.drug.arrests.14.17- fitted(mod2)) #residuals
+plot(pv, r, pch=20, ylab="raw residuals", xlab="predicted value")
+abline(h=0)
+sr <- rstandard(mod2)#standardized residual 
+plot(pv, sr, pch=20, ylab="standardized residuals", xlab="predicted value")
+abline(h=c(-2,0,2),lty=c(2,1,2))
 ```
 
 ### Quasipoisson 
@@ -212,6 +214,17 @@ cat('p-value of overdispersion test is', pchisq(sum(z^2), 12-5), "\n")
 ```
 
 * There is a bit of overdispersion in this model (94.67) and it is statistically significant. 
+
+```{r}
+par(mfrow=c(1,2))
+pv <- fitted(mod3) #predicted values 
+r <- (mod3dat$no.drug.arrests.13.18 - fitted(mod3)) #residuals
+plot(pv, r, pch=20, ylab="raw residuals", xlab="predicted value")
+abline(h=0)
+sr <- rstandard(mod3)#standardized residual 
+plot(pv, sr, pch=20, ylab="standardized residuals", xlab="predicted value")
+abline(h=c(-2,0,2),lty=c(2,1,2))
+```
 
 ### Run Quasi Poisson model 
 
