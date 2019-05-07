@@ -89,3 +89,43 @@ arrests %>%
        subtitle = "Distribution of Categories",
        caption = "Source: NYC Open Data",
        fill = NULL) 
+
+
+# Arrests v. by Racial Composition
+
+zip.results <- zip.results %>%
+                mutate(MajorityNonWhite = ifelse(proportionNonWhite > .50, 'Yes', 'No'))
+
+ggplot(zip.results, aes(x = no.ems.calls.13.18, y = no.drug.arrests.13.18, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Within each zip code",
+       x = 'EMS Calls 2013 - 2018',
+       y = 'Drug Arrests 2013 - 2018',
+       caption = "Source: NYC Open Data, 2017 ACS",
+       fill = NULL) 
+  
+ggplot(zip.results, aes(x = Total.Naxolone.Saves, y = no.drug.arrests.13.18, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Within each zip code",
+       x = 'Naxolone Saves 2016 - 2018',
+       y = 'Drug Arrests 2013 - 2018',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       fill = NULL) 
+
+ggplot(zip.results, aes(x = Overdose.Death.Total, y = no.drug.arrests.13.18, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Within each zip code",
+       x = 'Overdose Deaths 2016 - 2018',
+       y = 'Drug Arrests 2013 - 2018',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       fill = NULL) 
+
+
+
+
+
+
+
