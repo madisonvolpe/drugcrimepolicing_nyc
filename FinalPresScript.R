@@ -156,6 +156,11 @@ ggplot(data = mod1, aes(x=reorder(factor(zip),-no.drug.arrests.13.18), y=no.drug
        fill = NULL)
 
 
+# Model datasets for presentation 
+
+mod1 <- read.csv("./data/ModelDatasets/zipcodeModel1.csv")
+mod2 <- read.csv("./data/ModelDatasets/zipcodeModel2.csv")
+mod3 <- read.csv("./data/ModelDatasets/zipcodeModel3.csv")
 
 
 

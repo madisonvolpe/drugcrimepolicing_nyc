@@ -104,7 +104,7 @@ mod2dat <- read.csv(here("data/ModelDatasets", 'zipcodeModel2.csv'))
 
 * g is zipcode 
 
-* s_{g} is the number of 'drug arrests' in zipcode (g)
+* s_{g,t} is the number of 'drug arrests' in zipcode (g)
 
 * p_{g,t} is the total population over age 18 in zipcode (g) at time (t) 
 
@@ -240,3 +240,38 @@ summary(mod3quasi)
 ```
 
 * When you add the extra variables (naxolone saves, overdose deaths) and then account for overdispersion with the quaispoisson model, the poroportionNonWhite variable is still positive, but remains significant only at the .1 signficance level. The other variables (no.ems.calls.13.18, Total.Naxolone.Saves, Overdose.Death.Total - do not remain significant at all). 
+
+```{r}
+#stargazer::stargazer(mod1quasi, mod2quasi, mod3quasi, title = "Poisson Regression Results", no.space = TRUE)
+```
+
+\begin{table}[!htbp] \centering 
+  \caption{Poisson Regression Results} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & no.drug.arrests.13.18 & no.drug.arrests.14.17 & no.drug.arrests.13.18 \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
+\hline \\[-1.8ex] 
+ no.ems.calls.13.18 & 0.0001 &  & 0.0005 \\ 
+  & (0.0001) &  & (0.0003) \\ 
+  no.ems.calls.14.17 &  & 0.001$^{**}$ &  \\ 
+  &  & (0.0003) &  \\ 
+  proportionNonWhite & 2.070$^{***}$ & 2.126$^{***}$ & 1.320$^{*}$ \\ 
+  & (0.467) & (0.297) & (0.563) \\ 
+  Total.Naxolone.Saves &  &  & $-$0.007 \\ 
+  &  &  & (0.006) \\ 
+  Overdose.Death.Total &  &  & $-$0.005 \\ 
+  &  &  & (0.012) \\ 
+  Constant & $-$4.369$^{***}$ & $-$6.073$^{***}$ & $-$3.680$^{***}$ \\ 
+  & (0.251) & (0.160) & (0.447) \\ 
+ \hline \\[-1.8ex] 
+Observations & 12 & 48 & 12 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
