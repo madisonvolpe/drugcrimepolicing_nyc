@@ -1,0 +1,28 @@
+---
+title: "Latex for Final Pres"
+author: "Madison Volpe"
+date: "5/8/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+$$
+log(E(\mu|\lambda)) = \alpha + x' \beta
+$$
+$$
+Exp(log(E\mu|\lambda)) = Exp(\alpha+x' \beta) = E(\mu|\lambda) = e^{\alpha} + e^{x'\beta}
+$$
+
+$$
+log(E(\mu|\lambda)) = log(exposure) +\alpha + x' \beta
+$$
+
+$$
+log(\dfrac{E(\mu|\lambda)}{exposure}) = \alpha + x'\beta
+$$
+
+
+
