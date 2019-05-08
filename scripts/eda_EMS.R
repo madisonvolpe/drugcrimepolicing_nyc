@@ -106,7 +106,16 @@ ems %>%
   group_by(zipcode) %>%
   summarise(n=n()) %>%
   arrange(desc(n)) %>% 
-  left_join(zipWhite)
+  left_join(zipWhite) %>%
+  ggplot(aes(x = percentnonWhite, y = n)) +
+    geom_point() + 
+    geom_line() +
+    labs(title = "Number of EMS calls v. Percent Nonwhite",
+       subtitle = "By zip code",
+       x = 'Percent Non White',
+       y = 'EMS Calls 2013 - 2017',
+       caption = "Source: NYC Open Data, 2017 ACS",
+       fill = NULL) 
 
 ## Food for thought 
 

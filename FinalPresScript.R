@@ -90,8 +90,13 @@ arrests %>%
        caption = "Source: NYC Open Data",
        fill = NULL) 
 
+# Examining the EMS dispatch data to explain in pres  
+ems2 <- read.csv("./data/emsdrugs.csv")
 
-# Arrests v. by Racial Composition
+
+# EDA for Final Presentation
+
+## Arrests v. by Racial Composition
 
 zip.results <- zip.results %>%
                 mutate(MajorityNonWhite = ifelse(proportionNonWhite > .50, 'Yes', 'No'))
@@ -124,6 +129,31 @@ ggplot(zip.results, aes(x = Overdose.Death.Total, y = no.drug.arrests.13.18, col
        fill = NULL) 
 
 
+
+# Poisson Regression Explanation Final Pres
+
+mod1 <- read.csv("./data/ModelDatasets/zipcodeModel1.csv")
+
+ggplot(data = mod1, aes(x=reorder(factor(zip),-no.drug.arrests.13.18), y=no.drug.arrests.13.18, group =1))+
+  geom_bar(stat = 'identity') +
+  theme(axis.text.x = element_text(size = 10, angle = 25, hjust = 1)) +
+  labs(title = "Skewed Distribution of Drug Arrests",
+       subtitle = "Within each zip code",
+       x = 'Zip code',
+       y = 'Drug Arrests 2013 - 2018',
+       caption = "Source: NYC Open Data",
+       fill = NULL) 
+
+ggplot(data = mod1, aes(x=reorder(factor(zip),-no.drug.arrests.13.18), y=no.drug.arrests.13.18, group =1))+
+  geom_bar(stat = 'identity') +
+  theme(axis.text.x = element_text(size = 10, angle = 25, hjust = 1)) +
+  stat_smooth(method = 'glm', method.args = list(family = poisson)) +
+  labs(title = "Skewed Distribution of Drug Arrests",
+       subtitle = "With Logarithmic Smoother",
+       x = 'Zip code',
+       y = 'Drug Arrests 2013 - 2018',
+       caption = "Source: NYC Open Data",
+       fill = NULL)
 
 
 

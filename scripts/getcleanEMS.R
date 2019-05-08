@@ -129,7 +129,8 @@ str(ems)
    # DRUG - DRUG ALCOHOL ABUSE
    # DRUGFC - DRUG ALCOHOL ABUSE, FEVER + COUGH 
    
-   ems.drugs <- filter(ems, initial_call_type %in% c("DRUG", "DRUGFC") | final_call_type %in% c("DRUG", "DRUGFC"))
+   ems.drugs <- filter(ems, initial_call_type %in% c("DRUG", "DRUGFC") | 
+                         final_call_type %in% c("DRUG", "DRUGFC"))
    
 # one last thing check initial call type versus final call type, I will create indicator variable decide on
 # if we drop them later 
