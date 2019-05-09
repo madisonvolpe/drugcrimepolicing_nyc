@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(here)
+library(gmodels)
 ```
 
 ## Model One: Poisson Regression (Comparing Across (g) = Zipcodes)
@@ -38,6 +39,11 @@ $$
 mod1dat <- read.csv(here::here("data/ModelDatasets", "zipcodeModel1.csv"))
 ```
 
+```{r}
+#plot(no.drug.arrests.13.18~proportionNonWhite, mod1dat, log="y")
+#with(mod1dat, lines(lowess(no.drug.arrests.13.18~proportionNonWhite)))
+```
+
 ### Fit Poisson Model
 
 ```{r}
@@ -53,6 +59,10 @@ arm::display(mod1)
 
 ```{r}
 summary(mod1)
+```
+
+```{r}
+#plot(mod1)
 ```
 
 * *Intercept* - no interpretation
@@ -92,6 +102,11 @@ mod1quasi <- glm(formula = no.drug.arrests.13.18 ~ no.ems.calls.13.18 + proporti
 summary(mod1quasi)
 ```
 
+```{r}
+#plot(mod1quasi)
+#ci(mod1quasi)
+```
+
 ## Model Two: Poisson Regression (Comparing Across Zipcodes (g) + Time (t))
 
 $$
@@ -114,6 +129,11 @@ mod2dat <- read.csv(here("data/ModelDatasets", 'zipcodeModel2.csv'))
 
 ```{r}
 mod2dat$zip <- factor(mod2dat$zip)
+```
+
+```{r}
+#plot(no.drug.arrests.14.17~proportionNonWhite, mod2dat, log="y")
+#with(mod2dat, lines(lowess(no.drug.arrests.14.17~proportionNonWhite)))
 ```
 
 ### Fit Poisson Model
@@ -168,6 +188,11 @@ arm::display(mod2quasi)
 
 * The coefficient standard errors are definitely bigger than the model fit w. the poisson link, but they are not 'very big' in that I am definitely not worried about them. 
 * With this model, the proportionNonWhite parameter stays significant (p<.05), as well as the no.ems.calls.14.17 (p<.05). 
+
+```{r}
+#plot(mod2quasi)
+#ci(mod2quasi)
+```
 
 ## Model Three: Same as Model One with Extra Drug Activity Measures 
 
@@ -237,6 +262,11 @@ arm::display(mod3quasi)
 
 ```{r}
 summary(mod3quasi)
+```
+
+```{r}
+plot(mod3quasi)
+ci(mod3quasi)
 ```
 
 * When you add the extra variables (naxolone saves, overdose deaths) and then account for overdispersion with the quaispoisson model, the poroportionNonWhite variable is still positive, but remains significant only at the .1 signficance level. The other variables (no.ems.calls.13.18, Total.Naxolone.Saves, Overdose.Death.Total - do not remain significant at all). 
