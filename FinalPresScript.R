@@ -9,7 +9,7 @@ library(reshape2)
 
 ## Motivation One: Race Map of zipcodes 
 
-# read in Census Tract shapefile 
+# read in Zip code shapefile 
 shp <- readOGR(dsn = "shapefiles/ZipCode")
 shp@data$id = shp@data$zcta
 shp.points = fortify(shp, region="id")
@@ -129,6 +129,38 @@ ggplot(zip.results, aes(x = Overdose.Death.Total, y = no.drug.arrests.13.18, col
        fill = NULL) 
 
 
+## Arrests by Racial Composition  - But individual years to add more points to the graph
+
+zip.arrest.by.year <- read.csv("./data/ModelDatasets/zipcodeModel2.csv")
+
+zip.arrest.by.year <- filter(zip.arrest.by.year, year %in% c(2016,2017))
+
+zip.arrest.by.year <- select(zip.arrest.by.year, zip, year, no.drug.arrests.14.17,proportionNonWhite)
+
+zip.arrest.by.year$naxsaves <- c(72,98,17,15,16,24,46,58,55,63,59,77,18,26,15,19,25,27,20,25,26,54,37,54)
+
+zip.arrest.by.year$overdose <- c(6,8,7,13,4,2,7,5,11,14,14,21,4,4,4,6,5,10,5,7,9,6,16,13)
+
+zip.arrest.by.year$MajorityNonWhite <- ifelse(zip.arrest.by.year$proportionNonWhite > .50, 'Yes', 'No')
+
+ggplot(zip.arrest.by.year, aes(x = naxsaves, y = no.drug.arrests.14.17, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Not Aggregated",
+       x = 'Naxolone Saves 2016 - 2017',
+       y = 'Drug Arrests 2016 - 2017',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       fill = NULL) 
+
+ggplot(zip.arrest.by.year, aes(x = overdose, y = no.drug.arrests.14.17, color=MajorityNonWhite)) +
+  geom_point() + 
+  geom_vline(xintercept = 8.5)+
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Not Aggregated",
+       x = 'Overdose Deaths 2016 - 2017',
+       y = 'Drug Arrests 2016 - 2017',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       fill = NULL) 
 
 # Poisson Regression Explanation Final Pres
 
