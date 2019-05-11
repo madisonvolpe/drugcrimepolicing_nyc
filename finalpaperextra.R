@@ -6,6 +6,7 @@ library(maptools)
 library(rgdal)
 library(rgeos)
 library(reshape2)
+library(scales)
 
 ## Compare Marijuana v. Controlled Substance Arrests 
 arrests <- read.socrata("https://data.cityofnewyork.us/resource/uip8-fykc.csv")
@@ -29,6 +30,8 @@ arrests_cat %>%
        caption = "Source: NYC Open Data",
        fill = NULL)
 
+rm(list=ls())
+
 ## Spatial Map of Arrests in Zip code
 
 # read in Zip code shapefile 
@@ -44,3 +47,42 @@ shp.df$zcta <- as.numeric(as.character(shp.df$zcta))
 # load in model dataset 
 zip.results <- read.csv("./data/ModelDatasets/zipcodeModel3.csv")
 shp.df <- left_join(shp.df, zip.results, by = c('zcta'='zip'))
+
+# read in arrest data 
+arrests <- read_csv("./data/si_drugs_mod_arrests.csv")
+arrests_map <- select(arrests, x_coord_cd, y_coord_cd, perp_race)
+arrests_map <- arrests_map %>%
+               mutate(race_cat = case_when(
+                 perp_race == "BLACK" ~ "BLACK",
+                 perp_race == "WHITE" ~ "WHITE",
+                 perp_race == "HISPANIC" ~ "HISPANIC",
+                 !perp_race %in% c("BLACK", "WHITE", "HISPANIC") ~ "OTHER"
+               ))
+
+
+arrests_map <- arrests_map %>%
+               mutate(colorz = case_when(
+                 race_cat == "BLACK" ~ "red",
+                 race_cat == "WHITE" ~ "green",
+                 race_cat == "HISPANIC" ~ "black",
+                 race_cat == "OTHER" ~ "orange"
+               ))
+
+ggplot(shp.df) +
+  aes(long,lat,group=group) + 
+  geom_polygon(aes(fill = proportionNonWhite)) +
+  scale_fill_gradient(low = "gray", high = muted("blue")) +
+  geom_point(data = arrests_map, aes(x=x_coord_cd, y=y_coord_cd, col = factor(race_cat), shape = factor(race_cat)),
+             inherit.aes=FALSE) +
+  scale_colour_discrete(name  ="Offender's Race",
+                        breaks=c("BLACK", "WHITE", "OTHER", "HISPANIC"),
+                        labels=c("Black", "White", "Other", "Hispanic")) +
+  scale_shape_discrete(name = "Offender's Race",
+                       breaks=c("BLACK", "WHITE", "OTHER", "HISPANIC"),
+                       labels=c("Black", "White", "Other", "Hispanic")) +
+  theme_bw() +
+  labs(title = "Drug Arrests on Staten Island",
+       subtitle = "Offender's Race over Zip Code's Racial Composition",
+       caption = "Source: NYC Open Data",
+       fill = "Proportion Non-White") 
+
