@@ -2,7 +2,11 @@
 title: "Final Figures Report"
 author: "Madison Volpe"
 date: "5/11/2019"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -122,9 +126,9 @@ kableExtra::kable(final, format = 'latex', booktabs = T, caption = "Drug Arrests
   &  & (0.0003) &  \\ 
   Proportion Non-White & 2.070$^{***}$ & 2.126$^{***}$ & 1.320$^{*}$ \\ 
   & (0.467) & (0.297) & (0.563) \\ 
-  Naloxone Saves &  &  & $-$0.007 \\ 
+  Naloxone Saves (2016-2018) &  &  & $-$0.007 \\ 
   &  &  & (0.006) \\ 
-  Drug Overdose Deaths &  &  & $-$0.005 \\ 
+  Drug Overdose Deaths (2016-2018) &  &  & $-$0.005 \\ 
   &  &  & (0.012) \\ 
   Constant & $-$4.369$^{***}$ & $-$6.073$^{***}$ & $-$3.680$^{***}$ \\ 
   & (0.251) & (0.160) & (0.447) \\ 
