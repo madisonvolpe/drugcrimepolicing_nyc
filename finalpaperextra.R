@@ -86,3 +86,155 @@ ggplot(shp.df) +
        caption = "Source: NYC Open Data",
        fill = "Proportion Non-White") 
 
+rm(list=ls())
+
+## Drug Arrests in each Zip Code by Race 
+
+# read in drug arrests 
+drugs <- read.csv("./data/si_drugs_mod_arrests.csv")
+
+# read in zip shapefile 
+zip   <-readOGR(dsn = "./shapefiles/ZipCode")
+
+# convert zip to sf 
+zip <- st_as_sf(zip)
+zip <- zip[,c(1,4)]
+
+# filter for SI zip codes only 
+zip <- filter(zip, zcta %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                               10312, 10301, 10304, 10305, 10314, 10311, 10313))
+
+colnames(zip) <- c("zip", "geometry")
+
+# transfom zip to 4326 
+zip <- st_transform(zip, 4326)
+
+# get points from drugs dataset 
+points <- data.frame(x = drugs$longitude,  y = drugs$latitude, id = 1:nrow(drugs), race = drugs$perp_race) 
+points <- st_as_sf(points, coords = c("x", "y"), crs = 4326)
+
+# Intersection between polygon and points -
+intersection <- st_intersection(x = zip, y = points)
+intersection <- as.data.frame(intersection)
+intersection <- intersection[1:3]
+intersection <- as.data.frame(intersection)
+
+# Counts 
+race.results <- intersection %>%
+                  select(zip,race) %>%
+                  group_by(zip,race) %>%
+                  count() %>%
+                  spread(race,freq)
+  
+make.zero <- function(x){
+  x[is.na(x)] <- 0
+  return(x)
+}
+    
+make.numeric <- function(x){
+  x <- as.numeric(as.character(x))
+  return(x)
+}
+
+race.results <- data.frame(apply(race.results, 2, make.zero))
+race.results <- data.frame(apply(race.results, 2, make.numeric))
+
+race.results <- race.results %>%
+  mutate(OTHER = AMER.IND + AMERICAN.INDIAN.ALASKAN.NATIVE + ASIAN...PACIFIC.ISLANDER +
+           ASIAN.PAC.ISL+ UNKNOWN,
+         TOTAL = WHITE + BLACK + HISPANIC + OTHER) %>%
+  select(zip, WHITE, BLACK, HISPANIC, OTHER, TOTAL)
+
+zip.results <- read.csv("./data/ModelDatasets/zipcodeModel3.csv")
+
+final <- left_join(race.results, zip.results, by = 'zip')
+
+final <- final %>%
+  select(zip, WHITE, BLACK, HISPANIC, OTHER, TOTAL, Total.Population.Over18, proportionWhite, proportionNonWhite) %>%
+  mutate(MajorityNonWhite = ifelse(proportionNonWhite > .5, "Yes", "No")) %>%
+  mutate(DrugArrestRate = (TOTAL/Total.Population.Over18)*100) %>%
+  select(zip, WHITE, BLACK, HISPANIC, OTHER, TOTAL, MajorityNonWhite, DrugArrestRate) %>%
+  arrange(desc(DrugArrestRate))
+
+final$MajorityNonWhite <- factor(final$MajorityNonWhite)
+
+rm(list=ls())
+
+### EDA graphs
+zip.results <- read.csv("./data/ModelDatasets/zipcodeModel3.csv")
+
+zip.results <- zip.results %>%
+  mutate(MajorityNonWhite = ifelse(proportionNonWhite > .50, 'Yes', 'No'))
+
+rates <- select(zip.results, zip, no.drug.arrests.13.18, no.ems.calls.13.18, Total.Population.Over18,
+                Total.Naxolone.Saves, Overdose.Death.Total, MajorityNonWhite)
+
+rates <- rates %>%
+  mutate(Drug.Arrest.Rate = (no.drug.arrests.13.18/Total.Population.Over18)*100,
+         Ems.Dispatches.Rate = (no.ems.calls.13.18/Total.Population.Over18)*100,
+         Naloxone.Rate = (Total.Naxolone.Saves/Total.Population.Over18)*100,
+         Overdose.Death.Rate = (Overdose.Death.Total/Total.Population.Over18)*100
+         )
+
+a1 <- ggplot(rates, aes(x = Ems.Dispatches.Rate, y = Drug.Arrest.Rate, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Within each zip code",
+       x = 'EMS Dispatch Rate (2013-2018)',
+       y = 'Drug Arrest Rate (2013-2018)',
+       caption = "Source: NYC Open Data, 2017 ACS",
+       color = "Non-White Majority",
+       fill = NULL) 
+
+a2 <- ggplot(rates, aes(x = Naloxone.Rate, y = Drug.Arrest.Rate, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Within each zip code",
+       x = 'Naloxone Saves Rate (2016-2018)',
+       y = 'Drug Arrest Rate (2013-2018)',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       color = "Non-White Majority",
+       fill = NULL) 
+
+a3 <- ggplot(rates, aes(x = Overdose.Death.Rate, y = Drug.Arrest.Rate, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Within each zip code",
+       x = 'Overdose Death Rate (2016-2018)',
+       y = 'Drug Arrest Rate (2013-2018)',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       color = "Non-White Majority",
+       fill = NULL) 
+
+gridExtra::grid.arrange(a1,a2,a3)
+
+## Arrests by Racial Composition  - But individual years to add more points to the graph
+
+zip.arrest.by.year <- read.csv("./data/ModelDatasets/zipcodeModel2.csv")
+
+zip.arrest.by.year <- filter(zip.arrest.by.year, year %in% c(2016,2017))
+
+zip.arrest.by.year <- select(zip.arrest.by.year, zip, year, no.drug.arrests.14.17,proportionNonWhite,
+                             Total.Population.Over18)
+
+zip.arrest.by.year$naxsaves <- c(72,98,17,15,16,24,46,58,55,63,59,77,18,26,15,19,25,27,20,25,26,54,37,54)
+
+zip.arrest.by.year$overdose <- c(6,8,7,13,4,2,7,5,11,14,14,21,4,4,4,6,5,10,5,7,9,6,16,13)
+
+zip.arrest.by.year$MajorityNonWhite <- ifelse(zip.arrest.by.year$proportionNonWhite > .50, 'Yes', 'No')
+
+zip.arrest.by.year$Overdose.Death.Rate <- (zip.arrest.by.year$overdose/zip.arrest.by.year$Total.Population.Over18)*100
+zip.arrest.by.year$Drug.Arrest.Rate <- (zip.arrest.by.year$no.drug.arrests.14.17/zip.arrest.by.year$Total.Population.Over18)*100
+
+ggplot(zip.arrest.by.year, aes(x = Overdose.Death.Rate, y = Drug.Arrest.Rate, color=MajorityNonWhite)) +
+  geom_point() + 
+  labs(title = "Drug Arrests v. Drug Activity",
+       subtitle = "Not Aggregated",
+       x = 'Overdose Death Rate (2016 - 2017)',
+       y = 'Drug Arrest Rate (2016 - 2017)',
+       caption = "Source: NYC Open Data, SI Drug Prevention Dashboard",
+       color = "Non-White Majority",
+       fill = NULL) 
+
+
+

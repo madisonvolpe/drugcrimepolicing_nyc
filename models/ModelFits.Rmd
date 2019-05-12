@@ -272,7 +272,14 @@ ci(mod3quasi)
 * When you add the extra variables (naxolone saves, overdose deaths) and then account for overdispersion with the quaispoisson model, the poroportionNonWhite variable is still positive, but remains significant only at the .1 signficance level. The other variables (no.ems.calls.13.18, Total.Naxolone.Saves, Overdose.Death.Total - do not remain significant at all). 
 
 ```{r}
-#stargazer::stargazer(mod1quasi, mod2quasi, mod3quasi, title = "Poisson Regression Results", no.space = TRUE)
+# stargazer::stargazer(mod1quasi, mod2quasi, mod3quasi, title = "Poisson Regression Results", no.space = TRUE,
+#                      dep.var.labels = c("Drug Arrests (2013-2018)", "Drug Arrests (2014-2017)", 
+#                                        "Drug Arrests (2013-2018)"),
+#                     column.labels = c("Aggregated", "", "Aggregated"),
+#                     covariate.labels = c("EMS Calls 2013-2018", "EMS Calls 2014-2017",
+#                                          "Proportion Non-White", "Naloxone Saves",
+#                                          "Drug Overdose Deaths",
+#                                          "Constant"))
 ```
 
 \begin{table}[!htbp] \centering 
@@ -283,18 +290,19 @@ ci(mod3quasi)
 \hline \\[-1.8ex] 
  & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-4} 
-\\[-1.8ex] & no.drug.arrests.13.18 & no.drug.arrests.14.17 & no.drug.arrests.13.18 \\ 
+\\[-1.8ex] & Drug Arrests (2013-2018) & Drug Arrests (2014-2017) & Drug Arrests (2013-2018) \\ 
+ & Aggregated &  & Aggregated \\ 
 \\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- no.ems.calls.13.18 & 0.0001 &  & 0.0005 \\ 
+ EMS Calls 2013-2018 & 0.0001 &  & 0.0005 \\ 
   & (0.0001) &  & (0.0003) \\ 
-  no.ems.calls.14.17 &  & 0.001$^{**}$ &  \\ 
+  EMS Calls 2014-2017 &  & 0.001$^{**}$ &  \\ 
   &  & (0.0003) &  \\ 
-  proportionNonWhite & 2.070$^{***}$ & 2.126$^{***}$ & 1.320$^{*}$ \\ 
+  Proportion Non-White & 2.070$^{***}$ & 2.126$^{***}$ & 1.320$^{*}$ \\ 
   & (0.467) & (0.297) & (0.563) \\ 
-  Total.Naxolone.Saves &  &  & $-$0.007 \\ 
+  Naloxone Saves &  &  & $-$0.007 \\ 
   &  &  & (0.006) \\ 
-  Overdose.Death.Total &  &  & $-$0.005 \\ 
+  Drug Overdose Deaths &  &  & $-$0.005 \\ 
   &  &  & (0.012) \\ 
   Constant & $-$4.369$^{***}$ & $-$6.073$^{***}$ & $-$3.680$^{***}$ \\ 
   & (0.251) & (0.160) & (0.447) \\ 

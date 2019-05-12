@@ -1,0 +1,137 @@
+---
+title: "Final Figures Report"
+author: "Madison Volpe"
+date: "5/11/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(plyr)
+library(tidyverse)
+library(ggplot2)
+library(sf) # for shapefiles
+library(maptools)
+library(rgdal)
+library(rgeos)
+library(reshape2)
+library(scales)
+library(kableExtra)
+```
+
+```{r}
+# read in drug arrests 
+drugs <- read.csv("./data/si_drugs_mod_arrests.csv")
+
+# read in zip shapefile 
+zip   <-readOGR(dsn = "./shapefiles/ZipCode")
+
+# convert zip to sf 
+zip <- st_as_sf(zip)
+zip <- zip[,c(1,4)]
+
+# filter for SI zip codes only 
+zip <- filter(zip, zcta %in% c(10302, 10303, 10310, 10306, 10307, 10308, 10309, 
+                               10312, 10301, 10304, 10305, 10314, 10311, 10313))
+
+colnames(zip) <- c("zip", "geometry")
+
+# transfom zip to 4326 
+zip <- st_transform(zip, 4326)
+
+# get points from drugs dataset 
+points <- data.frame(x = drugs$longitude,  y = drugs$latitude, id = 1:nrow(drugs), race = drugs$perp_race) 
+points <- st_as_sf(points, coords = c("x", "y"), crs = 4326)
+
+# Intersection between polygon and points -
+intersection <- st_intersection(x = zip, y = points)
+intersection <- as.data.frame(intersection)
+intersection <- intersection[1:3]
+intersection <- as.data.frame(intersection)
+intersection$race <- as.character(intersection$race)
+
+# Counts 
+race.results <- intersection %>%
+                  select(zip,race) %>%
+                  group_by(zip,race) %>%
+                  count()
+
+names(race.results)[3] <- "Amount"
+
+race.results <- tidyr::spread(data= race.results, key = race, value = Amount)
+```
+
+```{r}
+make.zero <- function(x){
+  x[is.na(x)] <- 0
+  return(x)
+}
+
+make.numeric <- function(x){
+  x <- as.numeric(as.character(x))
+  return(x)
+}
+
+race.results <- data.frame(apply(race.results, 2, make.zero))
+race.results <- data.frame(apply(race.results, 2, make.numeric))
+
+race.results <- race.results %>%
+  mutate(OTHER = AMER.IND + AMERICAN.INDIAN.ALASKAN.NATIVE + ASIAN...PACIFIC.ISLANDER +
+           ASIAN.PAC.ISL+ UNKNOWN,
+         TOTAL = WHITE + BLACK + HISPANIC + OTHER) %>%
+  select(zip, WHITE, BLACK, HISPANIC, OTHER, TOTAL)
+
+zip.results <- read.csv("./data/ModelDatasets/zipcodeModel3.csv")
+
+final <- left_join(race.results, zip.results, by = 'zip')
+
+final <- final %>%
+  select(zip, WHITE, BLACK, HISPANIC, OTHER, TOTAL, Total.Population.Over18, proportionWhite, proportionNonWhite)%>%
+  mutate(MajorityNonWhite = ifelse(proportionNonWhite > .5, "Yes", "No")) %>%
+  mutate(DrugArrestRate = (TOTAL/Total.Population.Over18)*100) %>%
+  select(zip, WHITE, BLACK, HISPANIC, OTHER, TOTAL, MajorityNonWhite, DrugArrestRate) %>%
+  arrange(desc(DrugArrestRate))
+```
+
+```{r}
+kableExtra::kable(final, format = 'latex', booktabs = T, caption = "Drug Arrests by Zip Code",
+                  col.names = c("Zip","White", "Black", "Hispanic", "Other", "Total", "NonWhite Majority", "Arrest Rate")) %>%
+    kable_styling(latex_options = c("striped", "hold_position"),
+                full_width = F) 
+  
+```
+
+\begin{table}[!htbp] \centering 
+  \caption{Poisson Regression Results} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & Drug Arrests (2013-2018) & Drug Arrests (2014-2017) & Drug Arrests (2013-2018) \\ 
+ & Aggregated &  & Aggregated \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
+\hline \\[-1.8ex] 
+ EMS Calls 2013-2018 & 0.0001 &  & 0.0005 \\ 
+  & (0.0001) &  & (0.0003) \\ 
+  EMS Calls 2014-2017 &  & 0.001$^{**}$ &  \\ 
+  &  & (0.0003) &  \\ 
+  Proportion Non-White & 2.070$^{***}$ & 2.126$^{***}$ & 1.320$^{*}$ \\ 
+  & (0.467) & (0.297) & (0.563) \\ 
+  Naloxone Saves &  &  & $-$0.007 \\ 
+  &  &  & (0.006) \\ 
+  Drug Overdose Deaths &  &  & $-$0.005 \\ 
+  &  &  & (0.012) \\ 
+  Constant & $-$4.369$^{***}$ & $-$6.073$^{***}$ & $-$3.680$^{***}$ \\ 
+  & (0.251) & (0.160) & (0.447) \\ 
+ \hline \\[-1.8ex] 
+Observations & 12 & 48 & 12 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
