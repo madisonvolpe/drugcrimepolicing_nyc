@@ -1,3 +1,10 @@
+
+Executive Summary
+-----------------
+This project examined drug arrest patterns within zip codes across Staten Island using 2013 to 2018 arrest data. Staten Island is one of the boroughs of NYC that is unique in the island is racially segregated with neighborhoods with predominant minority populations situated on the island's North Shore and neighborhoods with majority white population situated on the island's South Shore. Staten Island is also no stranger to the drug epidemic with various news articles and research papers highlighting the crisis on the island. Due to the island's unique racial makeup and its drug crisis, our team was interested in examining *whether there was evidence of racial bias in drug arrests made across the island*. Through exploratory data analysis including spatial analysis as well as poisson regression models, **we were able to find evidence showing that even though drug activity was the same across white neighborhoods and minority neighborhoods, more drug arrests were happening on the island's north shore in minority niehgborhoods.**
+
+
+
 Introduction
 ------------
 
@@ -62,11 +69,11 @@ We are using the following data sources:
 
 ### Model datasets
 
--   Contains all datasets run in our poisson models
+-   Contains all datasets used in our poisson models
 
 ### ACS\_Demo
 
--   Datasets from the 2014 to 2017 American Community survey
+-   Datasets from the 2014 to 2017 American Community Survey
 
 -   ACS.14\_17 - combines ACS datasets into one large one
 
@@ -84,11 +91,12 @@ We are using the following data sources:
 Methods
 -------
 
--   Poisson models with arrest counts by zipcode
+- Exploratory Data Analysis
+- Poisson models with arrest counts by zipcode
+- Spatial analysis
 
--   Spatial analysis
-
-Limitations
------------
-
--   Measuring drug activity in zipcode
+Results
+-------
+1. EDA
+2. Poission models
+3. 
