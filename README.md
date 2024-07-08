@@ -99,4 +99,4 @@ Methods
 
 Results
 -------
-Results saved in research paper saved here 
+Further results saved in research paper saved [here](https://github.com/madisonvolpe/drugcrimepolicing_nyc/blob/master/deliverables/CJA.Final.Paper_Volpe_Wunschel_Wang.pdf). 
