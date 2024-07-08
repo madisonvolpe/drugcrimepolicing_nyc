@@ -5,9 +5,7 @@ This project examined drug arrest patterns within zip codes across Staten Island
 For example, the following visualization from our EDA shows that certain white majority neighborhoods have higher overdose death rates (our measure of drug activity) than minority majority neighborhoods. However, the minority neighborhoods have higher drug arrest rates. 
 ![](/images_exec_summary/arrestrate_vs_drugactivity.png)
 
-Furthermore, our poisson regression model shows 
-
-
+Furthermore, our poisson regression models show two insights regarding drug arrests on Staten Island. The first insight is that the racial composition of a zip code is associated with the expected count of drug arrests. A zip code with a higher proportion of non-white people will have a greater amount of drug arrests than a zip code with a lower proportion of non-white people when controlling for the level of drug activity. The second insight is that, given the insignificant p-values, measures of drug activity do not appear to be associated with the rate of drug arrests in zip codes on Staten Island. As a result, it appears that police are targeting non-white neighborhoods rather than neighborhoods with substantial drug activity.![](/images_exec_summary/poisson_regression_results.png)
 
 Introduction
 ------------
@@ -101,5 +99,4 @@ Methods
 
 Results
 -------
-1. EDA
-2. Poission models
+Results saved in research paper saved here 
