@@ -3,7 +3,9 @@ Executive Summary
 This project examined drug arrest patterns within zip codes across Staten Island using 2013 to 2018 arrest data. Staten Island is one of the boroughs of NYC that is unique in the island is racially segregated with neighborhoods with predominant minority populations situated on the island's North Shore and neighborhoods with majority white population situated on the island's South Shore. Staten Island is also no stranger to the drug epidemic with various news articles and research papers highlighting the crisis on the island. Due to the island's unique racial makeup and its drug crisis, our team was interested in examining *whether there was evidence of racial bias in drug arrests made across the island*. Through exploratory data analysis including spatial analysis as well as poisson regression models, **we were able to find evidence showing that even though drug activity was the same across white neighborhoods and minority neighborhoods, more drug arrests were happening on the island's north shore in minority niehgborhoods.**
 
 For example, the following visualization from our EDA shows that certain white majority neighborhoods have higher overdose death rates (our measure of drug activity) than minority majority neighborhoods. However, the minority neighborhoods have higher drug arrest rates. 
-!(/)
+![](/images_exec_summary/arrestrate_vs_drugactivity.png)
+
+Furthermore, our poisson regression model shows 
 
 
 
